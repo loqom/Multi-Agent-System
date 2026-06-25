@@ -1,0 +1,51 @@
+# LLM
+mistralai
+
+# LangChain Core
+langchain
+langchain-core
+langchain-community
+langgraph
+
+# Mistral Integration
+langchain-mistralai
+
+# Search Tool
+tavily-python
+
+# Web Scraping
+beautifulsoup4
+requests
+lxml
+
+# Backend API
+fastapi
+uvicorn
+
+# Environment Variables
+python-dotenv
+
+# Data Validation
+pydantic
+
+# Tokenization
+tiktoken
+
+# Async Support
+aiohttp
+httpx
+
+# Logging & Utilities
+rich
+
+# Optional Database / Memory
+sqlalchemy
+
+# JSON Handling
+orjson
+
+# For Agent Monitoring
+langsmith
+
+# Type Checking
+typing-extensions
