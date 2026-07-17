@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>AgentResearch</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-base: #050505;
+    --glass-bg: rgba(255, 255, 255, 0.03);
+    --glass-border: rgba(255, 255, 255, 0.08);
+    --primary: #7c3aed;
+    --primary-glow: rgba(124, 58, 237, 0.5);
+    --text-main: #f8fafc;
+    --text-muted: #94a3b8;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+  }
+  
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    background-color: var(--bg-base);
+    font-family: 'Inter', sans-serif;
+    color: var(--text-main);
+    min-height: 100vh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* Animated Mesh Gradient Background */
+  .bg-mesh {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    z-index: -1;
+    background: radial-gradient(circle at 15% 50%, rgba(124, 58, 237, 0.15), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(16, 185, 129, 0.1), transparent 25%);
+    filter: blur(60px);
+    animation: mesh-move 20s ease-in-out infinite alternate;
+  }
+  @keyframes mesh-move {
+    0% { transform: scale(1) translate(0, 0); }
+    50% { transform: scale(1.2) translate(-20px, 20px); }
+    100% { transform: scale(1) translate(20px, -20px); }
+  }
+
+  .container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Floating Nav */
+  nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 2rem;
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 100px;
+    margin: 1rem auto 4rem;
+    max-width: 800px;
+  }
+  .brand {
+    font-family: 'Outfit', sans-serif;
+    font-weight: 700;
+    font-size: 1.2rem;
+    background: linear-gradient(to right, #fff, #a78bfa);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .badge {
+    background: rgba(124, 58, 237, 0.1);
+    border: 1px solid rgba(124, 58, 237, 0.2);
+    color: #c4b5fd;
+    padding: 0.4rem 1rem;
+    border-radius: 100px;
+    font-size: 0.8rem;
+    font-weight: 500;
+  }
+
+  /* Hero */
+  .hero {
+    text-align: center;
+    margin-bottom: 4rem;
+    animation: fade-up 1s ease-out forwards;
+  }
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .hero h1 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 4rem;
+    font-weight: 700;
+    line-height: 1.1;
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+  }
+  .hero p {
+    font-size: 1.1rem;
+    color: var(--text-muted);
+    max-width: 500px;
+    margin: 0 auto 2.5rem;
+  }
+
+  /* Search Input */
+  .search-wrapper {
+    position: relative;
+    max-width: 600px;
+    margin: 0 auto;
+    transition: transform 0.3s ease;
+  }
+  .search-wrapper:focus-within {
+    transform: scale(1.02);
+  }
+  .search-input {
+    width: 100%;
+    padding: 1.2rem 1.5rem;
+    padding-right: 140px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    font-size: 1.1rem;
+    color: white;
+    outline: none;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 10px 30px -10px rgba(0,0,0,0.5);
+    transition: all 0.3s ease;
+  }
+  .search-input:focus {
+    border-color: rgba(124, 58, 237, 0.5);
+    box-shadow: 0 0 30px rgba(124, 58, 237, 0.15), inset 0 0 20px rgba(124, 58, 237, 0.05);
+  }
+  .search-input::placeholder { color: #475569; }
+  
+  .run-btn {
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    bottom: 8px;
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 14px;
+    padding: 0 1.5rem;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 0 20px var(--primary-glow);
+  }
+  .run-btn:hover:not(:disabled) {
+    background: #8b5cf6;
+    transform: translateY(-1px);
+    box-shadow: 0 5px 25px var(--primary-glow);
+  }
+  .run-btn:disabled {
+    background: #334155;
+    color: #94a3b8;
+    box-shadow: none;
+    cursor: not-allowed;
+  }
+
+  /* Pipeline Bento Grid */
+  .pipeline-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    max-width: 600px;
+    margin: 0 auto 4rem;
+  }
+  .step-card {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+  }
+  .step-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(circle at top right, rgba(255,255,255,0.05), transparent 50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .step-card:hover::before { opacity: 1; }
+  
+  .step-card.active {
+    border-color: rgba(124, 58, 237, 0.5);
+    background: rgba(124, 58, 237, 0.05);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px -10px rgba(124, 58, 237, 0.2);
+  }
+  .step-card.done {
+    border-color: rgba(16, 185, 129, 0.3);
+    background: rgba(16, 185, 129, 0.02);
+  }
+  .step-card.pending {
+    opacity: 0.5;
+  }
+  
+  .step-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  .step-icon {
+    width: 40px; height: 40px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.2rem;
+  }
+  
+  .c-search .step-icon { background: rgba(168, 85, 247, 0.1); color: #a855f7; }
+  .c-read .step-icon { background: rgba(56, 189, 248, 0.1); color: #38bdf8; }
+  .c-write .step-icon { background: rgba(251, 191, 36, 0.1); color: #fbbf24; }
+  .c-critic .step-icon { background: rgba(244, 63, 94, 0.1); color: #f43f5e; }
+
+  .status-indicator {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: #334155;
+  }
+  .active .status-indicator {
+    background: #a855f7;
+    box-shadow: 0 0 10px #a855f7;
+    animation: pulse 1.5s infinite;
+  }
+  .done .status-indicator { background: #10b981; }
+
+  .step-info h3 {
+    font-family: 'Outfit', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+  }
+  .step-info p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+
+  /* Results Section */
+  .results-section {
+    display: none;
+    animation: fade-up 0.8s ease-out forwards;
+  }
+  
+  .result-container {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    padding: 3rem;
+    backdrop-filter: blur(20px);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .result-container::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  }
+
+  .raw-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 100px;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    margin-bottom: 2rem;
+    transition: all 0.2s;
+  }
+  .raw-toggle:hover {
+    background: rgba(255,255,255,0.1);
+    color: white;
+  }
+  
+  .raw-content {
+    display: none;
+    background: rgba(0,0,0,0.5);
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  .raw-content pre {
+    font-family: 'Menlo', 'Monaco', monospace;
+    font-size: 0.85rem;
+    color: #94a3b8;
+    white-space: pre-wrap;
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  .raw-content pre::-webkit-scrollbar { width: 6px; }
+  .raw-content pre::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+
+  /* Markdown Typography */
+  .report-body {
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: #e2e8f0;
+  }
+  .report-body h1 { font-family: 'Outfit', sans-serif; font-size: 2.5rem; font-weight: 700; margin-bottom: 1.5rem; color: #fff; }
+  .report-body h2 { font-family: 'Outfit', sans-serif; font-size: 1.8rem; font-weight: 600; margin: 2rem 0 1rem; color: #f8fafc; border-bottom: 1px solid var(--glass-border); padding-bottom: 0.5rem; }
+  .report-body h3 { font-family: 'Outfit', sans-serif; font-size: 1.3rem; font-weight: 600; margin: 1.5rem 0 0.8rem; color: #c4b5fd; }
+  .report-body p { margin-bottom: 1.2rem; }
+  .report-body ul, .report-body ol { margin-left: 1.5rem; margin-bottom: 1.2rem; }
+  .report-body li { margin-bottom: 0.5rem; }
+  .report-body a { color: #a855f7; text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.2s; }
+  .report-body a:hover { border-color: #a855f7; }
+  .report-body strong { color: #fff; font-weight: 600; }
+  .report-body code { background: rgba(255,255,255,0.1); padding: 0.2rem 0.4rem; border-radius: 4px; font-family: monospace; font-size: 0.9em; }
+
+  /* Critic Section */
+  .critic-box {
+    margin-top: 3rem;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(245, 158, 11, 0.02));
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    border-radius: 20px;
+    padding: 2rem;
+    position: relative;
+  }
+  .critic-box::before {
+    content: '⭐ Critic Review';
+    position: absolute;
+    top: -12px;
+    left: 24px;
+    background: #1e1e1e; /* matches container approx */
+    padding: 0 10px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #fbbf24;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+    border-radius: 100px;
+  }
+  .critic-content {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    color: #fcd34d;
+  }
+  .critic-content p { margin-bottom: 0.8rem; }
+  .critic-content ul, .critic-content ol { margin-left: 1.5rem; margin-bottom: 0.8rem; }
+  .critic-content li { margin-bottom: 0.4rem; }
+  .critic-content strong { color: #fde68a; font-weight: 600; }
+
+  .reset-btn {
+    display: block;
+    margin: 3rem auto 0;
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    color: var(--text-muted);
+    padding: 0.8rem 2rem;
+    border-radius: 100px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .reset-btn:hover {
+    background: rgba(255,255,255,0.05);
+    color: white;
+  }
+
+  @keyframes pulse {
+    0% { transform: scale(0.95); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.5; }
+    100% { transform: scale(0.95); opacity: 1; }
+  }
+
+  @media (max-width: 768px) {
+    .hero h1 { font-size: 2.5rem; }
+    .pipeline-grid { grid-template-columns: 1fr; }
+    .result-container { padding: 1.5rem; }
+  }
+</style>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+
+<div class="bg-mesh"></div>
+
+<div class="container">
+  <nav>
+    <div class="brand">AgentResearch</div>
+    <div class="badge">4 Agents · LangGraph</div>
+  </nav>
+
+  <main>
+    <div class="hero" id="heroSection">
+      <h1>Research anything,<br>in seconds.</h1>
+      <p>Search, scrape, write, and critique fully autonomous multi-agent pipelines.</p>
+      
+      <div class="search-wrapper">
+        <input type="text" id="topicInput" class="search-input" placeholder="Enter a research topic..." autocomplete="off" />
+        <button id="runBtn" class="run-btn" onclick="startResearch()">Generate</button>
+      </div>
+    </div>
+
+    <div class="pipeline-grid" id="pipelineGrid">
+      <div class="step-card pending c-search" id="s0">
+        <div class="step-header">
+          <div class="step-icon">🔍</div>
+          <div class="status-indicator" id="b0"></div>
+        </div>
+        <div class="step-info">
+          <h3>Search Agent</h3>
+          <p id="st0">Waiting...</p>
+        </div>
+      </div>
+      
+      <div class="step-card pending c-read" id="s1">
+        <div class="step-header">
+          <div class="step-icon">🌐</div>
+          <div class="status-indicator" id="b1"></div>
+        </div>
+        <div class="step-info">
+          <h3>Reader Agent</h3>
+          <p id="st1">Waiting...</p>
+        </div>
+      </div>
+      
+      <div class="step-card pending c-write" id="s2">
+        <div class="step-header">
+          <div class="step-icon">✍️</div>
+          <div class="status-indicator" id="b2"></div>
+        </div>
+        <div class="step-info">
+          <h3>Writer Chain</h3>
+          <p id="st2">Waiting...</p>
+        </div>
+      </div>
+      
+      <div class="step-card pending c-critic" id="s3">
+        <div class="step-header">
+          <div class="step-icon">🧠</div>
+          <div class="status-indicator" id="b3"></div>
+        </div>
+        <div class="step-info">
+          <h3>Critic Chain</h3>
+          <p id="st3">Waiting...</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="results-section" id="resultsSection">
+      <button class="raw-toggle" onclick="toggleRaw()">
+        <span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg></span>
+        Raw Agent Data
+      </button>
+      
+      <div class="raw-content" id="rawBody">
+        <pre id="rawText"></pre>
+      </div>
+
+      <div class="result-container">
+        <div class="report-body" id="reportContent"></div>
+        
+        <div class="critic-box">
+          <div id="criticText" class="critic-content"></div>
+        </div>
+      </div>
+
+      <button class="reset-btn" onclick="resetUI()">← Start New Research</button>
+    </div>
+  </main>
+</div>
+
+<script>
+// --- Stage logic ---
+const STAGES=[
+  {active:'Searching Tavily web...',done:'Search complete'},
+  {active:'Scraping top results...',done:'Content scraped'},
+  {active:'Drafting report...',done:'Report drafted'},
+  {active:'Reviewing & critiquing...',done:'Critique complete'},
+];
+
+function setStage(i,state){
+  const s=document.getElementById('s'+i),st=document.getElementById('st'+i);
+  s.className = 'step-card ' + state + ' ' + ['c-search','c-read','c-write','c-critic'][i];
+  if(state==='active') st.textContent=STAGES[i].active;
+  else if(state==='done') st.textContent=STAGES[i].done;
+  else st.textContent='Waiting...';
+}
+
+function renderReport(raw){
+  const parts = raw.split('\n\n---\n\n🔍 Critic Review:\n');
+  const reportMd = parts[0] || '';
+  const criticRaw = parts[1] || '';
+
+  document.getElementById('reportContent').innerHTML = marked.parse(reportMd);
+  document.getElementById('criticText').innerHTML = marked.parse(criticRaw);
+}
+
+function toggleRaw(){
+  const body = document.getElementById('rawBody');
+  body.style.display = body.style.display === 'block' ? 'none' : 'block';
+}
+
+let searchRaw='';
+
+async function startResearch(){
+  const topic=document.getElementById('topicInput').value.trim();
+  if(!topic)return;
+  const btn=document.getElementById('runBtn');
+  btn.disabled=true; btn.textContent='Running...';
+  document.getElementById('resultsSection').style.display='none';
+  document.getElementById('rawBody').style.display='none';
+  searchRaw='';
+  
+  for(let i=0;i<4;i++) setStage(i,'pending');
+
+  const BACKEND_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
+    ? 'http://localhost:5000' 
+    : 'https://YOUR_RENDER_APP_NAME.onrender.com'; // TODO: REPLACE THIS WITH YOUR ACTUAL RENDER URL
+
+  try{
+    const es=new EventSource(`${BACKEND_URL}/research?topic=${encodeURIComponent(topic)}`);
+    es.onmessage=(e)=>{
+      const {stage,status,data}=JSON.parse(e.data);
+      const idx={search:0,reader:1,writer:2,critic:3}[stage];
+      if(idx===undefined)return;
+      setStage(idx,status);
+      if(stage==='search'&&status==='done'&&data){searchRaw=data;}
+      if(stage==='critic'&&status==='done'){
+        es.close();
+        document.getElementById('rawText').textContent=searchRaw||'(no raw data)';
+        renderReport(data||'');
+        
+        // Hide pipeline, show results
+        document.getElementById('pipelineGrid').style.display = 'none';
+        document.getElementById('heroSection').style.display = 'none';
+        document.getElementById('resultsSection').style.display='block';
+        window.scrollTo({top: 0, behavior: 'smooth'});
+        
+        btn.disabled=false; btn.textContent='Generate';
+      }
+    };
+    es.onerror=()=>{es.close();fallbackDemo(topic,btn)};
+  }catch(e){fallbackDemo(topic,btn)}
+}
+
+function fallbackDemo(topic,btn){
+  let i=0;
+  function step(){
+    if(i>0)setStage(i-1,'done');
+    if(i<4){setStage(i,'active');i++;setTimeout(step,1600);}
+    else{
+      const demoReport=`# Research Report: ${topic}\n\n## Introduction\nThis is a demo report. Connect your Flask backend to see real AI-generated content here.\n\n## Key Findings\n\n### 1. Finding One\nYour Search Agent would surface relevant sources from Tavily here.\n\n### 2. Finding Two\nThe Reader Agent scrapes and extracts deep content from the top URLs.\n\n### 3. Finding Three\nThe Writer Chain synthesizes everything into a structured report.\n\n## Conclusion\nThe Critic Chain reviews and scores the final output.\n\n## Sources\n- https://example.com/source-1\n- https://example.com/source-2\n\n---\n\n🔍 Critic Review:\nScore: 8/10\n\nStrengths:\n- Well structured\n- Good use of sources\n\nAreas to Improve:\n- Add more depth\n- Cite primary sources\n\nOne line verdict:\nSolid research report with room to go deeper.`;
+      
+      document.getElementById('rawText').textContent='[Demo mode — backend not connected]\n\nSearch Agent would return Tavily results here.';
+      renderReport(demoReport);
+      
+      document.getElementById('pipelineGrid').style.display = 'none';
+      document.getElementById('heroSection').style.display = 'none';
+      document.getElementById('resultsSection').style.display='block';
+      window.scrollTo({top: 0, behavior: 'smooth'});
+      
+      btn.disabled=false; btn.textContent='Generate';
+    }
+  }
+  step();
+}
+
+function resetUI(){
+  document.getElementById('resultsSection').style.display='none';
+  document.getElementById('pipelineGrid').style.display='grid';
+  document.getElementById('heroSection').style.display='block';
+  document.getElementById('topicInput').value = '';
+  for(let i=0;i<4;i++) setStage(i,'pending');
+}
+
+document.getElementById('topicInput').addEventListener('keydown',e=>{if(e.key==='Enter')startResearch()});
+</script>
+</body>
+</html>

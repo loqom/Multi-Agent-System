@@ -19,8 +19,9 @@ requests
 lxml
 
 # Backend API
-fastapi
-uvicorn
+flask
+flask-cors
+gunicorn
 
 # Environment Variables
 python-dotenv

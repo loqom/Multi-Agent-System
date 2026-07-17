@@ -10,11 +10,11 @@ from bs4 import BeautifulSoup
 
 tavily=TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
 
-out=[]
 
 @tool
 def web_search(query:str)->str:
     """search the web for recent and reliable information about topic.Returns title,url and snippets""" 
+    out=[]
     result=tavily.search(query=query,max_results=5)
     for r in result['results']:
         out.append(
